@@ -29,8 +29,7 @@ PyTorch implementation of Deep Convolutional Generative Adversarial Networks (DC
 </table>
 
 ### References
-1. http://blog.aylien.com/introduction-generative-adversarial-networks-code-tensorflow/
-2. http://blog.evjang.com/2016/06/generative-adversarial-nets-in.html
-3. https://github.com/hwalsuklee/tensorflow-GAN-1d-gaussian-ex
-
+1. https://github.com/znxlwm/pytorch-MNIST-CelebA-GAN-DCGAN
+2. https://github.com/moono/moo-dl-practice/tree/master/Work-place/DCGAN-MNIST
+3. https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/deep_convolutional_gan
 
