@@ -19,7 +19,7 @@ num_filters = [1024, 512, 256, 128]
 learning_rate = 0.0002
 betas = (0.5, 0.999)
 batch_size = 128
-num_epochs = 30
+num_epochs = 20
 data_dir = '../Data/MNIST_data/'
 save_dir = 'MNIST_DCGAN_results/'
 
@@ -168,7 +168,7 @@ def plot_result(generator, noise, num_epoch, save=False, save_dir='MNIST_DCGAN_r
     gen_image = generator(noise)
     gen_image = denorm(gen_image)
 
-    generator.train()
+    # generator.train()
 
     n_rows = np.sqrt(noise.size()[0]).astype(np.int32)
     n_cols = np.sqrt(noise.size()[0]).astype(np.int32)
