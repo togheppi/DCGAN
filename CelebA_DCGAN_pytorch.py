@@ -1,4 +1,4 @@
-# MNIST image generation using DCGAN
+# CelebA image generation using DCGAN
 import torch
 from torch.autograd import Variable
 import torchvision.datasets as dsets
@@ -11,8 +11,8 @@ import imageio
 # Parameters
 image_size = 64
 G_input_dim = 100
-G_output_dim = 1
-D_input_dim = 1
+G_output_dim = 3
+D_input_dim = 3
 D_output_dim = 1
 num_filters = [1024, 512, 256, 128]
 
@@ -20,20 +20,17 @@ learning_rate = 0.0002
 betas = (0.5, 0.999)
 batch_size = 128
 num_epochs = 20
-data_dir = '../Data/MNIST_data/'
-save_dir = 'MNIST_DCGAN_results/'
+data_dir = '../Data/celebA_data/resized_celebA'
+save_dir = 'CelebA_DCGAN_results/'
 
-# MNIST dataset
+# CelebA dataset
 transform = transforms.Compose([transforms.Scale(image_size),
                                 transforms.ToTensor(),
                                 transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))])
 
-mnist_data = dsets.MNIST(root=data_dir,
-                         train=True,
-                         transform=transform,
-                         download=True)
+celebA_data = dsets.ImageFolder(data_dir, transform=transform)
 
-data_loader = torch.utils.data.DataLoader(dataset=mnist_data,
+data_loader = torch.utils.data.DataLoader(dataset=celebA_data,
                                           batch_size=batch_size,
                                           shuffle=True)
 
@@ -138,7 +135,7 @@ class Discriminator(torch.nn.Module):
 
 
 # Plot losses
-def plot_loss(d_losses, g_losses, num_epoch, save=False, save_dir='MNIST_DCGAN_results/', show=False):
+def plot_loss(d_losses, g_losses, num_epoch, save=False, save_dir='CelebA_DCGAN_results/', show=False):
     fig, ax = plt.subplots()
     ax.set_xlim(0, num_epochs)
     ax.set_ylim(0, max(np.max(g_losses), np.max(d_losses))*1.1)
@@ -152,7 +149,7 @@ def plot_loss(d_losses, g_losses, num_epoch, save=False, save_dir='MNIST_DCGAN_r
     if save:
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
-        save_fn = save_dir + 'MNIST_DCGAN_losses_epoch_{:d}'.format(num_epoch + 1) + '.png'
+        save_fn = save_dir + 'CelebA_DCGAN_losses_epoch_{:d}'.format(num_epoch + 1) + '.png'
         plt.savefig(save_fn)
 
     if show:
@@ -161,10 +158,10 @@ def plot_loss(d_losses, g_losses, num_epoch, save=False, save_dir='MNIST_DCGAN_r
         plt.close()
 
 
-def plot_result(generator, noise, num_epoch, save=False, save_dir='MNIST_DCGAN_results/', show=False, fig_size=(5, 5)):
+def plot_result(generator, noise, num_epoch, save=False, save_dir='CelebA_DCGAN_results/', show=False, fig_size=(5, 5)):
     generator.eval()
 
-    noise = Variable(noise.cuda())
+    noise = Variable(noise.cuda(), volatile=True)
     gen_image = generator(noise)
     gen_image = denorm(gen_image)
 
@@ -176,7 +173,10 @@ def plot_result(generator, noise, num_epoch, save=False, save_dir='MNIST_DCGAN_r
     for ax, img in zip(axes.flatten(), gen_image):
         ax.axis('off')
         ax.set_adjustable('box-forced')
-        ax.imshow(img.cpu().data.view(image_size, image_size).numpy(), cmap='gray', aspect='equal')
+        # Scale to 0-255
+        img = (((img - img.min()) * 255) / (img.max() - img.min())).cpu().data.numpy().transpose(1, 2, 0).astype(np.uint8)
+        # ax.imshow(img.cpu().data.view(image_size, image_size, 3).numpy(), cmap=None, aspect='equal')
+        ax.imshow(img, cmap=None, aspect='equal')
     plt.subplots_adjust(wspace=0, hspace=0)
     title = 'Epoch {0}'.format(num_epoch+1)
     fig.text(0.5, 0.04, title, ha='center')
@@ -185,7 +185,7 @@ def plot_result(generator, noise, num_epoch, save=False, save_dir='MNIST_DCGAN_r
     if save:
         if not os.path.exists(save_dir):
             os.mkdir(save_dir)
-        save_fn = save_dir + 'MNIST_DCGAN_epoch_{:d}'.format(num_epoch+1) + '.png'
+        save_fn = save_dir + 'CelebA_DCGAN_epoch_{:d}'.format(num_epoch+1) + '.png'
         plt.savefig(save_fn)
 
     if show:
@@ -218,6 +218,10 @@ fixed_noise = torch.randn(num_test_samples, G_input_dim).view(-1, G_input_dim, 1
 for epoch in range(num_epochs):
     D_losses = []
     G_losses = []
+
+    # if epoch == 5:
+    #     G_optimizer.param_groups[0]['lr'] /= 10
+    #     D_optimizer.param_groups[0]['lr'] /= 10
 
     # minibatch training
     for i, (images, _) in enumerate(data_loader):
@@ -283,15 +287,34 @@ for epoch in range(num_epochs):
     plot_result(G, fixed_noise, epoch, save=True, fig_size=(5, 5))
 
 # Make gif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 loss_plots = []
 gen_image_plots = []
 for epoch in range(num_epochs):
     # plot for generating gif
-    save_fn1 = save_dir + 'MNIST_DCGAN_losses_epoch_{:d}'.format(epoch + 1) + '.png'
+    save_fn1 = save_dir + 'CelebA_DCGAN_losses_epoch_{:d}'.format(epoch + 1) + '.png'
     loss_plots.append(imageio.imread(save_fn1))
 
-    save_fn2 = save_dir + 'MNIST_DCGAN_epoch_{:d}'.format(epoch + 1) + '.png'
+    save_fn2 = save_dir + 'CelebA_DCGAN_epoch_{:d}'.format(epoch + 1) + '.png'
     gen_image_plots.append(imageio.imread(save_fn2))
 
-imageio.mimsave(save_dir + 'MNIST_DCGAN_losses_epochs_{:d}'.format(num_epochs) + '.gif', loss_plots, fps=5)
-imageio.mimsave(save_dir + 'MNIST_DCGAN_epochs_{:d}'.format(num_epochs) + '.gif', gen_image_plots, fps=5)
+imageio.mimsave(save_dir + 'CelebA_DCGAN_losses_epochs_{:d}'.format(num_epochs) + '.gif', loss_plots, fps=5)
+imageio.mimsave(save_dir + 'CelebA_DCGAN_epochs_{:d}'.format(num_epochs) + '.gif', gen_image_plots, fps=5)
