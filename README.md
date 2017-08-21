@@ -4,7 +4,7 @@ PyTorch implementation of Deep Convolutional Generative Adversarial Networks (DC
 ## Network architecture
 * Generator
     * hidden layers: Four 4x4 strided convolutional layers (1024, 512, 256, and 128 kernels, respectively) with ReLU
-    * output layer: 4x4 strided convolutional layer (1024 nodes = 64x64 size image) with Tanh
+    * output layer: 4x4 strided convolutional layer (4096 nodes = 64x64 size image) with Tanh
     * Batch normalization is used except for output layer
 
 * Discriminator
